@@ -1,0 +1,6 @@
+INFO| 2017-05-04 14:45:45,033 |Initialization | config_path is D:\quarkscript\UFO_appium\config\appium_config.ini init is complate!
+INFO| 2017-05-04 14:45:45,045 |get_cases | load case number is 3
+INFO| 2017-05-04 14:45:45,114 |Initialization | 设备不存在 
+INFO| 2017-05-04 14:45:45,131 |Initialization | 设备不存在 
+INFO| 2017-05-04 14:45:45,154 |Initialization | 设备不存在 
+INFO| 2017-05-04 14:45:45,154 |'NoneType' object has no attribute 'implicitly_wait'

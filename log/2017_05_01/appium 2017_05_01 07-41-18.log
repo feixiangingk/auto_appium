@@ -1,0 +1,5 @@
+INFO| 2017-05-01 07:41:18,285 |Initialization | config_path is D:\quarkscript\UFO_appium\config\appium_config.ini init is complate!
+INFO| 2017-05-01 07:41:45,385 |BasePage | NoSuchElementException error isMessage: An element could not be located on the page using the given search parameters.
+; name,我的
+INFO| 2017-05-01 07:41:45,385 |Message: An element could not be located on the page using the given search parameters.
+
