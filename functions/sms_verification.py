@@ -41,7 +41,7 @@ class Message():
         interface=appium_init.inital.get_cases_info('interface')
         sms_login_url=interface['sms_login_url']
         sms_serach_url=interface['sms_serach_url']
-        print sms_login_url,sms_serach_url
+        # print sms_login_url,sms_serach_url
 
         return self.get_message(str(phone),sms_login_url,sms_serach_url)
 

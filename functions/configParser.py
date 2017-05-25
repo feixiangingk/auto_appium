@@ -1,5 +1,5 @@
 #coding:utf-8
-import configparser
+import configparser,codecs
 
 class Config():
 	"""
@@ -11,7 +11,7 @@ class Config():
 
 #根据section，path读取配置文件信息，以字典的格式返回
 	def get_config(self,section,path):
-		self.config.read(path)
+		self.config.readfp(codecs.open(path,'r','utf-8-sig'))
 		values=self.config.options(section)
 		parameter_dict={}
 		for i in values:

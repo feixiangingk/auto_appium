@@ -1,85 +1,50 @@
 #coding=utf-8
 import time,os
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from appium.webdriver.common.touch_action import TouchAction
+from appium.webdriver.webelement import WebElement
 from functions.appium_init import *
-
+import sys,re,math,operator
+from PIL import Image
 
 class BasePage(object):
 	"""
 	封装关于Appium中操作元素对象的方法
 	"""
-#new PO
+
 	def __init__(self, driver):
-	#	print driver
 		self.driver = driver
+		self.logger=appium_init.inital.logger
 
 
+	#根据何乐获取的方法名、方法行数对日志异常修改完善
 	def base_find_element(self,locator,value):
 		try:
+			WebDriverWait(self.driver, 15).until(lambda driver: driver.find_element(locator,value).is_displayed())
 			return self.driver.find_element(locator,value)
-		except NoSuchElementException,e:
-			if isinstance(appium_init.inital,Initialization)!=True:
-				Init()
-			appium_init.inital.logger.info('BasePage | NoSuchElementException error is%s; %s,%s' %(e,locator,value))
-			raise e
+		except TimeoutException,e:
+			self.logger.info('BasePage | TimeoutException error occur at {one};function name is {two};locator is {three} {four} Exception:{five};'.format(one=sys._getframe().f_back.f_lineno,																																				 two=sys._getframe().f_back.f_code.co_name,
+																																				three=locator,four=value,five=e))
+			self.saveScreenshot(sys._getframe().f_back.f_code.co_name)
+
+
+
 
 	def base_find_elements(self,locator,value):
-		try:
-			return self.driver.find_element(locator,value)
-		except NoSuchElementException,e:
-			if isinstance(appium_init.inital,Initialization)!=True:
-				Init()
-			appium_init.inital.logger.info('BasePage | NoSuchElementException error is%s; %s,%s' %(e,locator,value))
-			raise e
+
+		if len(self.driver.find_elements(locator, value)):
+			return self.driver.find_elements(locator, value)
+		else:
+			self.logger.info('BasePage | NoSuchElementException error occur at {one};function name is {two};locator is {three} {four};'.format(one=sys._getframe().f_back.f_lineno,
+																																			   two=sys._getframe().f_back.f_code.co_name,
+																																			   three=locator,four=value))
+			self.saveScreenshot(sys._getframe().f_back.f_code.co_name)
 
 
-		# 重新封装输入方法
-	def send_values(self,element,kvalue,name):
-		try:
-			element.send_keys(kvalue)
-		except AttributeError:
-			self.driver.saveScreenshot(name)
 
-			print "%s 页面未能找到 %s 元素" % (self,)
 
-		# 重新封装按钮点击方法
-	def clickButton(self, loc, find_first=True):
-		try:
-			if find_first:
-				self.find_element(loc)
-			self.find_element(loc).click()
-		except AttributeError:
 
-			print "%s 页面未能找到 %s 按钮" % (self, loc)
-
-	def checkElementIsShown(self, *loc):
-		"""
-		判断某个控件是否显示
-
-		:param loc: 元组类型,结构必须是(By.NAME, u'财讯')
-		"""
-		try:
-			self.find_element(*loc)
-			return True
-		except:
-			return False
-
-	def waitForElementNotPresent(self, period, *loc):
-		"""
-		等待某个控件不再显示
-
-		:param loc: 元组类型,结构必须是(By.NAME, u'财讯')
-		:param period：等待的秒数
-		"""
-		for i in range(0, period):
-			time.sleep(1)
-			if not self.checkElementIsShown(*loc):
-				return True
-			else:
-				continue
-		raise Exception("Cannot find Element seconds")
 
 	def get_size(self):
 		"""
@@ -117,7 +82,7 @@ class BasePage(object):
 		window_size = self.get_size()
 		width = window_size.get("width")
 		height = window_size.get("height")
-		self.driver.swipe(width / 4, height / 2, width * 3 / 4, height / 2, 500)
+		self.driver.swipe(width / 8, height / 2, width * 7 / 8, height / 2, 500)
 
 	def swipe_to_right(self):
 		"""
@@ -127,7 +92,7 @@ class BasePage(object):
 		window_size = self.get_size()
 		width = window_size.get("width")
 		height = window_size.get("height")
-		self.driver.swipe(width * 4 / 5, height / 2, width / 5, height / 2, 500)
+		self.driver.swipe(width * 7 / 8, height / 2, width / 8, height / 2, 500)
 
 	def reLoadApp(self):
 		"""
@@ -149,38 +114,7 @@ class BasePage(object):
 		"""
 		self.driver.tap([(x, y)], peroid)
 
-	def clickElement(self, *loc):
-		"""
-		点击某一个控件，如果改控件不存在则会抛出异常
 
-		:param loc: 元组类型,结构必须是(By.NAME, u'财讯')
-		"""
-		element = self.find_element(*loc)
-		element.click()
-
-
-	def getTextOfElement(self, *loc):
-		"""
-		获取某个控件显示的文本，如果该控件不能找到则会抛出异常
-
-		:param loc: 元组类型,结构必须是(By.NAME, u'财讯')
-		:Return: str, 返回该控件显示的文本
-
-		:Usage:
-			self.getTextOfElement(elementInfo)
-		"""
-		element = self.find_element(*loc)
-		return element.text
-
-	def clearTextEdit(self, *loc):
-		"""
-		清除文本框里面的文本
-
-		:Usage:
-			self.clearTextEdit(*loc)
-		"""
-		element = self.find_element(*loc)
-		element.clear()
 
 	def pressBackKey(self):
 		"""
@@ -195,13 +129,11 @@ class BasePage(object):
 		"""
 		self.driver.hide_keyboard()
 
-	def press_TouchAction(self):
 
+	def press_TouchAction(self):
 		window_size = self.get_size()
 		width = window_size.get("width")
 		height = window_size.get("height")
-		print width,height
-		print int(width * 0.5),(height*0.9)
 		TouchAction(self.driver).press(x=int(width * 0.5), y=int(height*0.9)).release().perform()
 
 
@@ -216,26 +148,29 @@ class BasePage(object):
 		result = self.driver.wait_activity(activity, timeout)
 		return result
 
+
 	# savePngName:生成图片的名称
 	def savePngName(self, name):
 			"""
 			name：自定义图片的名称
 			"""
-
-			_path= Initialization()
+			# 每次实例化Initalization太浪费内存，已经定义好的全局变量就是为了减少初始化类反复实例化
+			if isinstance(appium_init.inital,Initialization)!=True:
+				Init()
+			inital=appium_init.inital
 			day = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-			fp = _path.project_path+"\\result\\" + day + "\\image\\" + day
+			fp = inital.project_path+"\\result\\" + day + "\\image\\" + day
 			tm = self.saveTime()
 			type = ".png"
 			if os.path.exists(fp):
 				filename = fp + "\\" + tm + "_" + name + type
-				print filename
+				# print filename
 				# print "True"
 				return filename
 			else:
 				os.makedirs(fp)
 				filename = fp + "\\" + tm + "_" + name + type
-				print filename
+				# print filename
 				# print "False"
 				return filename
 
@@ -257,6 +192,86 @@ class BasePage(object):
 			image = self.driver.save_screenshot(self.savePngName(name))
 			return image
 
+
+
+	def get_screenshot_by_element(self, instance, function_name, isexist=True):
+
+		'''
+		
+		:param instance: Page类的实例，比如  a=HomePage()传入的就是a
+		:param function_name:  Page类的元素方法名，注意是字符串。eg:'el_my_btn'
+		:param isexist:  截图对比图片是否存在，即断言对比的图片是否存在，默认存在，就能调用对比，如果不存在就填False，保持该元素图片，以供下次对比
+		:return:  返回self  ，方便same_as()方法连续调用
+		'''
+
+		r = r".([a-z0-9A-Z]*)'>"
+		class_name = re.findall(r, str(type(instance)))[0]
+		if isexist == False:
+			self.img_file = appium_init.inital.project_path+ "\\img\\" + class_name + "_" + function_name + ".png"
+		elif isexist == True:
+			self.img_file = appium_init.inital.project_path+ "\\img\\" + "temp_" + class_name + "_" + function_name + ".png"
+		else:
+			appium_init.inital.logger.info("Pictrue | get_screenshot_by_element : isexist value is error %s" % isexist)
+			return False
+		f = getattr(instance, function_name)
+		element = f
+		time.sleep(5)
+		self.driver.get_screenshot_as_file(self.img_file)
+
+		if isinstance(element,WebElement):
+			# 获取元素bounds
+			location = element.location
+			size = element.size
+			box = (location["x"], location["y"], location["x"] + size["width"], location["y"] + size["height"])
+		else:
+			appium_init.inital.logger.info("Pictrue | get_screenshot_by_element :  element is not found! locator is %s" %function_name)
+			return False
+		# 截取图片
+		image = Image.open(self.img_file)
+		newImage = image.crop(box)
+		newImage.save(self.img_file)
+		appium_init.inital.logger.info("Pictrue | get_screenshot_by_element:pic %s save complate!" % self.img_file)
+		return self
+
+	def same_as(self, percent=30):
+		'''
+		
+		:param percent: 相似的百分百，0为100%相似，数值越高，对比容忍度越高，默认值为30
+		:return:  返回True/False   True对比通过，False对比不通过
+		'''
+		try:
+			image1 = Image.open(self.img_file)
+			image2 = Image.open(self.img_file.replace("temp_", ""))
+		except IOError,e:
+			print(e)
+			appium_init.inital.logger.info("Pictrue | same_as: %s" %e)
+			return False
+
+		histogram1 = image1.histogram()
+		histogram2 = image2.histogram()
+
+		differ = math.sqrt(reduce(operator.add, list(map(lambda a, b: (a - b) ** 2,
+														 histogram1, histogram2))) / len(histogram1))
+		if differ <= percent:
+			return True
+		else:
+			return False
+
+		#判断元素是否存在于当前页面
+	def proving_element(self,el):
+		"""
+		:param el: 元素 
+		:return: True  False
+		"""
+		source = self.driver.page_source
+		#print  source
+		if el in source:
+			return True
+		else:
+			return False
+
+	def element_is_exsit(self,el):
+		return isinstance(el,WebElement)
 
 
 

@@ -1,0 +1,9 @@
+log/
+result/
+config/
+.idea/
+*.pyc
+*.log
+*.html
+*.project
+.settings/

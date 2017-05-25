@@ -4,58 +4,71 @@ import time
 from selenium.webdriver.common.by import By
 from functions.BasePage import BasePage
 from functions.appium_init import *
-from pages.my_page import MyPage
+from pages.startup_page import StartupPage
+from pages.register_choose_page import RegisterChoosePage
 
 
-class Login_Test(BasePage):
+class LoginPage(BasePage):
+
+    context='im login page'
 
 #new  PO  return element
 
+#登录页面没有该元素，删除
+    # @property
+    # def el_my_btn(self):
+    #     return self.base_find_element(By.NAME,u'我的')
 
-
-    @property
-    def el_my_btn(self):
-        return self.base_find_element(By.NAME,u'我的')
-
+    #手机号 文本输入框 元素
     @property
     def el_phone_text_input(self):
         return self.base_find_element(By.ID,"com.quarkfinance.ufo:id/edit_name")
 
-
+    #密码 文本输入框 元素
     @property
     def el_pwd_text_input(self):
         return self.base_find_element(By.ID,"com.quarkfinance.ufo:id/edit_password")
 
+    #登录按钮 元素
     @property
     def el_login_btn(self):
         return  self.base_find_element(By.ID,"com.quarkfinance.ufo:id/tv_login")
 
+    #注册按钮 元素
+    @property
+    def el_register_btn(self):
+        return self.base_find_element(By.XPATH,"//android.widget.TextView[contains(@text,'注册')]")
 
-    def logic_login(self,phone,pwd):
-        self.el_my_btn.click()
-        self.el_phone_text_input.send_keys(phone)
-        self.el_pwd_text_input.send_keys(pwd)
-        self.el_login_btn.click()
-        time.sleep(3)
-        return MyPage(self.driver)
+    #点击跳转至register_sms_page页面
+    def logic_link_register(self):
+        self.el_register_btn.click()
+        return RegisterChoosePage(self.driver)
 
 
-    def page_swipe(self):
-        time.sleep(2)
-        self.swipe_to_right()
-        time.sleep(2)
-        self.swipe_to_right()
-        time.sleep(2)
-        self.swipe_to_right()
-        time.sleep(2)
-        self.press_TouchAction()
-        time.sleep(5)
+    #逻辑方法-登录
+    def logic_login(self,phone='14488888098',pwd='qwe123'):
+            """
+             :param phone: 账户
+             :param pwd:  密码
+              :return:  HomePage
+            """
+
+            from pages.home_page import HomePage
+            self.el_phone_text_input.send_keys(phone)
+            self.el_pwd_text_input.send_keys(pwd)
+            self.el_login_btn.click()
+            #time.sleep(3)
+            return HomePage(self.driver)
+
+
+
 
 
 if __name__ == '__main__':
     # info = Initialization()
     Init()
     driver = appium_init.inital.get_driver()
-    d = Login_Test(driver)
-    d.logic_login('18048444414','hele5201')
+    d = LoginPage(driver)
+    #d.logic_login('18048444414','hele5201')
     time.sleep(2)
+

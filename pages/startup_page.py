@@ -1,23 +1,26 @@
 #coding:utf-8
-from pages.base_page import BasePage
-from pages.home_page import HomePage
+from functions.BasePage import BasePage
 from appium.webdriver.common.touch_action import TouchAction
 import  time
 
 class StartupPage(BasePage):
 
-    def swipLeft(self):
-        x = self.driver.get_window_size()['width']
-        y = self.driver.get_window_size()['height']
-        start_x=int(x*0.8)
-        end_x=int(x*0.2)
-        start_y=int(y*0.5)
-        end_y=int(y*0.5)
-        for i in xrange(3):
-            self.driver.swipe(start_x,start_y,end_x,end_y)
-            time.sleep(1)
-        TouchAction(self.driver).press(x=377,y=1048).wait(100).release().perform()
-        time.sleep(1)
-        return HomePage(self.driver)
 
+ # @staticmethod 这里作为静态方法，没必要，因为所有page都继承basePage,都有self属性，basePage自带driver
+    def page_swipe(self):
+        from pages.home_page import HomePage
+        time.sleep(2)
+        # BasePage(self.driver).swipe_to_right()
+        self.swipe_to_right()
+        time.sleep(2)
+        self.swipe_to_right()
+        # BasePage(self.driver).swipe_to_right()
+        time.sleep(2)
+        self.swipe_to_right()
+        # BasePage(self.driver).swipe_to_right()
+        time.sleep(2)
+        self.press_TouchAction()
+        # BasePage(self.driver).press_TouchAction()
+        time.sleep(5)
+        return HomePage(self.driver)
 
