@@ -9,7 +9,7 @@ class AndroidDebugBridge(object):
         command_text = 'adb %s' % command
        # print command_text
         results = os.popen(command_text, "r")
-       # print results
+        #print results
         while 1:
             line = results.readline()
             if not line: break
@@ -89,8 +89,10 @@ class AndroidDebugBridge(object):
 
 if __name__ == '__main__':
     a=AndroidDebugBridge()
+    t=a.call_adb("logcat")
+    print  t
     # print a.get_app_pid('com.quarkfinance.ufo')
     # a.call_adb('install '+ '../Data/ufo.apk')
     #a.call_adb( 'uninstall '+' com.quarkfinance.ufo')
-    print a.attached_devices()
+   # print a.attached_devices()
    # a.get_app_pid('com.quarkfinance.ufo')

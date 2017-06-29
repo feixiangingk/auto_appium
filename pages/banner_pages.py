@@ -1,5 +1,4 @@
 #coding=utf-8
-from pages.my_page import MyPage
 from functions.BasePage import BasePage
 from selenium.webdriver.common.by import By
 from functions.appium_init import *

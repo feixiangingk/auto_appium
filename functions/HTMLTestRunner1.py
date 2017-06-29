@@ -100,6 +100,7 @@ import sys
 import time
 import unittest
 from xml.sax import saxutils
+from functions.appium_init import *
 
 
 # ------------------------------------------------------------------------
@@ -112,6 +113,7 @@ from xml.sax import saxutils
 # e.g.
 #   >>> logging.basicConfig(stream=HTMLTestRunner.stdout_redirector)
 #   >>>
+
 
 class OutputRedirector(object):
     """ Wrapper to redirect stdout or stderr """
@@ -136,6 +138,7 @@ stderr_redirector = OutputRedirector(sys.stderr)
 # Template
 
 class Template_mixin(object):
+
     """
     Define a HTML template for report customerization and generation.
 
@@ -302,6 +305,8 @@ function showOutput(id, name) {
 </body>
 </html>
 """
+
+
     # variables: (title, generator, stylesheet, heading, report, ending)
 
 
@@ -373,6 +378,10 @@ a.popup_link:hover {
     color: white;
     background-color: #777;
 }
+#result_table td {
+		border: 1px solid #777;
+		padding: 2px;		}
+
 #total_row  { font-weight: bold; }
 .passClass  { background-color: #74A474; }
 .failClass  { background-color: #FDD283; }
@@ -446,6 +455,7 @@ a.popup_link:hover {
     <td>失败</td>
     <td>错误</td>
     <td>查看</td>
+    <td>截图</td>
 </tr>
 %(test_list)s
 <tr id='total_row'>
@@ -454,6 +464,7 @@ a.popup_link:hover {
     <td>%(Pass)s</td>
     <td>%(fail)s</td>
     <td>%(error)s</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
 </tr>
 </table>
@@ -467,9 +478,10 @@ a.popup_link:hover {
     <td>%(fail)s</td>
     <td>%(error)s</td>
     <td><a href="javascript:showClassDetail('%(cid)s',%(count)s)">详情</a></td>
+    <td>&nbsp;</td>
 </tr>
 """ # variables: (style, desc, count, Pass, fail, error, cid)
-
+    url=appium_init.inital.html_runner_url
 
     REPORT_TEST_WITH_OUTPUT_TMPL = r"""
 <tr id='%(tid)s' class='%(Class)s'>
@@ -490,10 +502,15 @@ a.popup_link:hover {
         </pre>
     </div>
     <!--css div popup end-->
-
     </td>
+    
+   <td align='center'>
+	<a target="_blank" href="{url}/{nowdata}/%(image)s" title="%(image)s ">
+	<img src="http:\\172.29.23.27:8080\jenkins\job\UFO_appium\ws\app\img.png" height=20 width=20 border=0 /></a>
+	</td>
 </tr>
-""" # variables: (tid, Class, style, desc, status)
+""".format(url=url,nowdata=time.strftime('%Y-%m-%d', time.localtime(time.time())))
+    # variables: (tid, Class, style, desc, status)
 
 
     REPORT_TEST_NO_OUTPUT_TMPL = r"""
@@ -508,6 +525,9 @@ a.popup_link:hover {
 %(id)s: %(output)s
 """ # variables: (id, output)
 
+    REPORT_TEST_OUTPUT_IMAGE = r"""
+    %(screenshot)s
+    """
 
 
     # ------------------------------------------------------------------------
@@ -532,6 +552,7 @@ class _TestResult(TestResult):
         self.success_count = 0
         self.failure_count = 0
         self.error_count = 0
+        self.image_view = 0
         self.verbosity = verbosity
 
         # result is a list of result in 4 tuple
@@ -695,6 +716,7 @@ class HTMLTestRunner(Template_mixin):
             report = report,
             ending = ending,
         )
+        #output.as_string()
         self.stream.write(output.encode('utf8'))
 
 
@@ -763,6 +785,7 @@ class HTMLTestRunner(Template_mixin):
 
     def _generate_report_test(self, rows, cid, tid, n, t, o, e):
         # e.g. 'pt1.1', 'ft1.1', etc
+        
         has_output = bool(o or e)
         tid = (n == 0 and 'p' or 'f') + 't%s.%s' % (cid+1,tid+1)
         name = t.id().split('.')[-1]
@@ -774,13 +797,15 @@ class HTMLTestRunner(Template_mixin):
         if isinstance(o,str):
             # TODO: some problem with 'string_escape': it escape \n and mess up formating
             # uo = unicode(o.encode('string_escape'))
-            uo = o.decode('latin-1')
+            #uo = o.decode('latin-1')
+            uo = o.decode('utf-8')
         else:
             uo = o
         if isinstance(e,str):
             # TODO: some problem with 'string_escape': it escape \n and mess up formating
             # ue = unicode(e.encode('string_escape'))
-            ue = e.decode('latin-1')
+           # ue = e.decode('latin-1')
+            ue = e.decode('utf-8')
         else:
             ue = e
 
@@ -789,12 +814,17 @@ class HTMLTestRunner(Template_mixin):
             output = saxutils.escape(uo+ue),
         )
 
+        image = self.REPORT_TEST_OUTPUT_IMAGE % dict(
+            screenshot=saxutils.escape(uo + ue)
+        )
+
         row = tmpl % dict(
             tid = tid,
             Class = (n == 0 and 'hiddenRow' or 'none'),
             style = n == 2 and 'errorCase' or (n == 1 and 'failCase' or 'none'),
             desc = desc,
             script = script,
+            image=image[image.find("image"):(int(image.find("png"))+3)],
             status = self.STATUS[n],
         )
         rows.append(row)

@@ -2,6 +2,7 @@
 from functions.BasePage import BasePage
 from selenium.webdriver.common.by import By
 from pages.buy_trade_result_page import BuyTradeResultPage
+import time
 
 
 class BuyConfirmPage(BasePage):
@@ -25,6 +26,7 @@ class BuyConfirmPage(BasePage):
 
     #页面逻辑封装，点击立即投资，输入登录密码，点击确定按钮
     def logic_confirm_info(self,pwd='qwe123'):
+        time.sleep(0.5)
         self.el_buy_btn.click()
         self.el_password_text_input.send_keys(pwd)
         self.el_confirm_btn.click()

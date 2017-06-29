@@ -13,9 +13,13 @@ class BasePage(object):
 	封装关于Appium中操作元素对象的方法
 	"""
 
-	def __init__(self, driver):
+	def __init__(self, driver,phone="14488888098",pwd="qwe123"):
 		self.driver = driver
 		self.logger=appium_init.inital.logger
+		self.phone=phone
+		self.pwd=pwd
+
+
 
 
 	#根据何乐获取的方法名、方法行数对日志异常修改完善
@@ -29,22 +33,19 @@ class BasePage(object):
 			self.saveScreenshot(sys._getframe().f_back.f_code.co_name)
 
 
-
-
 	def base_find_elements(self,locator,value):
 
 		if len(self.driver.find_elements(locator, value)):
 			return self.driver.find_elements(locator, value)
 		else:
+			for i in xrange(15):
+				time.sleep(1)
+				if len(self.driver.find_elements(locator,value)):
+					return self.driver.find_elements(locator,value)
 			self.logger.info('BasePage | NoSuchElementException error occur at {one};function name is {two};locator is {three} {four};'.format(one=sys._getframe().f_back.f_lineno,
 																																			   two=sys._getframe().f_back.f_code.co_name,
-																																			   three=locator,four=value))
+																																		   three=locator,four=value))
 			self.saveScreenshot(sys._getframe().f_back.f_code.co_name)
-
-
-
-
-
 
 	def get_size(self):
 		"""
@@ -155,11 +156,29 @@ class BasePage(object):
 			name：自定义图片的名称
 			"""
 			# 每次实例化Initalization太浪费内存，已经定义好的全局变量就是为了减少初始化类反复实例化
+
+			tm = self.saveTime()
+			day = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+			type = ".png"
+			fp = ".\\result\\" + day + "\\image"
+			if os.path.exists(fp):
+				filename = str(fp) + "\\" + str(tm) + str("_") + str(name) + str(type)
+				print filename
+				return filename
+			else:
+				os.makedirs(fp)
+				filename = str(fp) + "\\" + str(tm) + str("_") + str(name) + str(type)
+				print filename
+				return filename
+
+			'''
 			if isinstance(appium_init.inital,Initialization)!=True:
 				Init()
 			inital=appium_init.inital
 			day = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+
 			fp = inital.project_path+"\\result\\" + day + "\\image\\" + day
+
 			tm = self.saveTime()
 			type = ".png"
 			if os.path.exists(fp):
@@ -172,7 +191,7 @@ class BasePage(object):
 				filename = fp + "\\" + tm + "_" + name + type
 				# print filename
 				# print "False"
-				return filename
+				return filename '''
 
 	# 获取系统当前时间
 	def saveTime(self):
@@ -233,6 +252,7 @@ class BasePage(object):
 		appium_init.inital.logger.info("Pictrue | get_screenshot_by_element:pic %s save complate!" % self.img_file)
 		return self
 
+
 	def same_as(self, percent=30):
 		'''
 		
@@ -256,6 +276,7 @@ class BasePage(object):
 			return True
 		else:
 			return False
+
 
 		#判断元素是否存在于当前页面
 	def proving_element(self,el):

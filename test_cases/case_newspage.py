@@ -9,6 +9,8 @@ from pages.banner_pages import BannerPages
 from functions.appium_init import *
 from pages.startup_page import StartupPage
 from functions.sqlServerJDBC import Exce_SQLserver
+from functions.BasePage import BasePage
+from pages.entry_page import Entry_page
 
 class NewsMesg(InterfaceCase):
     """消息中心模块验证"""
@@ -18,13 +20,12 @@ class NewsMesg(InterfaceCase):
         self.logger = self.inital.logger
 
 
-
     def test_newspage_contract(self):
         """消息中心-合同消息-本金确认书验证"""
 
-
         #客户登录并进入消息中心列表
-        newspage = self.logon()
+        entry_page = Entry_page(self.driver)
+        newspage = entry_page.open_news_page()
         #点击合同列表页面
         contractspage=newspage.click_el_contract_message_btn()
         #点击合同详情页
@@ -32,23 +33,65 @@ class NewsMesg(InterfaceCase):
         #点击出借本金确认书 el_capital_btn
         contractdetailspage.clcik_el_capital_btn()
 
-        bool1 = contractdetailspage.get_screenshot_by_element(contractdetailspage, 'el_capital_img',isexist=False)  #第一次截图时
+        contractdetailspage.get_screenshot_by_element(contractdetailspage, 'el_capital_img',isexist=False)  #第一次截图时
         #进行截图对比
-        time.sleep(5)
+        time.sleep(4)
         bool1= contractdetailspage.get_screenshot_by_element(contractdetailspage,'el_capital_img',isexist=True).same_as(percent=30)
-        print bool1
-
         #断言判断
         title=contractdetailspage.el_capitalt_title.text
+        self.basepage = BasePage(self.driver)
+        self.basepage.saveScreenshot('newspage_contract')
         self.assertTrue(bool1)
         self.assertEqual(title,'出借本金确认书')
+
+
+    def test_contract_details_no1(self):
+        """消息中心-出借咨询与服务协议验证"""
+        entry_page = Entry_page(self.driver)
+        newspage = entry_page.open_news_page()
+        contractspage = newspage.click_el_contract_message_btn()
+        contractdetailspage=contractspage.click_el_check_pact_btn()
+        contractdetailspage.el_service_agreement_btn.click()
+
+        title = contractdetailspage.el_capitalt_title.text
+        entry_page.saveScreenshot("contract_details_no2")
+
+        self.assertEquals(title,"出借咨询与服务协议")
+
+
+    def test_contract_details_no2(self):
+        """消息中心-授权委托书-出借确认和债权转让验证"""
+        entry_page = Entry_page(self.driver)
+        newspage = entry_page.open_news_page()
+        contractspage = newspage.click_el_contract_message_btn()
+        contractdetailspage = contractspage.click_el_check_pact_btn()
+        contractdetailspage.el_confirmation_btn.click()
+
+        title = contractdetailspage.el_capitalt_title.text
+        entry_page.saveScreenshot("contract_details_no1")
+
+        self.assertEquals("授权委托书-出借确认和债权转让",title)
+
+    def test_contract_details_no3(self):
+        """消息中心-授权委托书-催收及诉讼验证"""
+        entry_page = Entry_page(self.driver)
+        newspage = entry_page.open_news_page()
+        contractspage = newspage.click_el_contract_message_btn()
+        contractdetailspage = contractspage.click_el_check_pact_btn()
+        contractdetailspage.el_litigation_btn.click()
+
+        title = contractdetailspage.el_capitalt_title.text
+        entry_page.saveScreenshot("contract_details_no3")
+        self.assertEquals("授权委托书-催收及诉讼", title)
 
 
     def test_contract_list(self):
         """消息中心-合同消息-展示本金确认书合同列表"""
 
         # 客户登录并进入消息中心列表
-        newspage = self.logon()
+        entry_page = Entry_page(self.driver)
+        newspage = entry_page.open_news_page()
+
         # 点击合同列表页面
         contractspage = newspage.click_el_contract_message_btn()
 
@@ -71,6 +114,8 @@ class NewsMesg(InterfaceCase):
         #print  contract_number[0][0]
 
         #断言处理
+        self.basepage = BasePage(self.driver)
+        self.basepage.saveScreenshot('contract_list')
         self.assertIn(con_list[0],product_name[0][0])
         self.assertEqual(con_list[2],contract_number[0][0])
 
@@ -80,28 +125,21 @@ class NewsMesg(InterfaceCase):
         """
 
 
-
     def test_consultation_mes(self):
         """消息中心-咨询消息-展示咨询消息列表"""
 
         # 客户登录并进入消息中心列表
-        newspage = self.logon()
+        entry_page=Entry_page(self.driver)
+        newspage=entry_page.open_news_page()
 
         # 点击合同列表页面
         newsconsultspage = newspage.click_el_consult_message_btn()
 
         newsconsultspage_title=newsconsultspage.el_service_agreement_title.text
 
+        entry_page.saveScreenshot('consultation_mes')
         self.assertEqual(newsconsultspage_title,'咨询消息')
 
-    def logon(self):
-        startupPage = StartupPage(self.driver)
-        homepage = startupPage.page_swipe()
-        loginPage = homepage.logic_link_login_page()
-        homepage = loginPage.logic_login()
-        time.sleep(1)
-        newspage = homepage.logic_click_el_news_img()
-        return  newspage
 
     def tearDown(self):
         self.driver.quit()

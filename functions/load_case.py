@@ -21,7 +21,7 @@ class LoadCase():
 
 		#全选按钮打开，获取所有用例
 		elif cases_info.get('load_all') in ['Y','y','*']:
-			cases_list=loader.discover(cases_info.get('cases_path'),pattern='*.py')
+			cases_list=loader.discover(cases_info.get('cases_path'),pattern='case_*.py')
 			for module in cases_list:
 				testSuite.addTests(module)
 

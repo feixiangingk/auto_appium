@@ -5,6 +5,7 @@ from appium import webdriver
 from configParser import Config
 from functions.appium_logging import AppLog
 from functions.adbConnon import AndroidDebugBridge
+from functions.read_excel import ReadExcel
 import appium_init
 
 inital=None
@@ -30,6 +31,18 @@ class Initialization():
         #读取配置文件中project_path信息，作为initial的属性保存
         self.project_path=self.desired_caps['project_path']
 
+        #读取配置文件中的appium_command信息，作为initial的属性保存
+        self.appium_command=self.desired_caps['appium_command']
+        self.html_runner_url=self.desired_caps['html_runner_url']
+
+        #读取配置文件中excel_path信息，把excel中的返回的字典作为initial的属性保存
+        readExcel=ReadExcel(self.desired_caps['excel_path'])
+        self.excel_info=readExcel.get_info()
+
+        read_buyProduct_Excel=ReadExcel(self.desired_caps['buyproduct_excel_path'])
+        self.buyProduct_info=read_buyProduct_Excel.get_buy_product_info()
+
+
         #将常用配置信息，日志类、ADB调用类、手机系统监控类（待扩展）的实例作为属性绑定在inital中，这些常用类避免反复实例化浪费内存影响效率
         appLog = AppLog(self.project_path)
         self.logger = appLog.logger
@@ -54,14 +67,17 @@ class Initialization():
         """
         # 通过adb判断设备是否启动
         if self.adbCall.attached_devices():
+
             # desired_caps_config = self.get_desired_caps()
             desired_caps = {}
             desired_caps['platformName'] = self.desired_caps['platformname']
-            desired_caps['platformVersion'] = self.desired_caps[
-                'platformversion']
+            desired_caps['platformVersion'] = self.desired_caps['platformversion']
             desired_caps['deviceName'] = self.desired_caps['devicename']
             desired_caps['appPackage'] = self.desired_caps['apppackage']
             desired_caps['appActivity'] = self.desired_caps['appactivity']
+            desired_caps["unicodeKeyboard"] = "True"
+            desired_caps["resetKeyboard"] = "True"
+            #desired_caps['udid'] = '192.168.89.101'
 
             time.sleep(1)
             # driver 实例化前，调用adb命令卸载和重新安装应用,保证每次测试用例执行的环境都是干净的
@@ -86,9 +102,14 @@ class Init():
         appium_init.inital=Initialization()
 
 
+
 if __name__ == '__main__':
-    if isinstance(appium_init.inital,Initialization)!=True:
-        Init()
-    print appium_init.inital.desired_caps
+
+    a=Initialization()
+    a.get_driver()
+
+    #if isinstance(appium_init.inital,Initialization)!=True:
+     #   Init()
+    #print appium_init.inital.excel_info
 
 
